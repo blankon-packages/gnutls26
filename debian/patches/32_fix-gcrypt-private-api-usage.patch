@@ -1,0 +1,45 @@
+Description: Use GCRY_THREAD_OPTION_PTHREAD_IMPL macro
+ instead of defining the gcry_thread_cbs structure itself.
+ .
+ This allows building against libgcrypt 1.6
+ .
+Origin: http://git.gnupg.org/cgi-bin/gitweb.cgi?p=gpg4win.git;a=blob;f=patches/gnutls-2.12.23/fix-gcrypt-private-api-usage.patch;h=c4efe34d5b48b36ef2fc66d4c123697e7acb5d57;hb=HEAD
+Author: Andre Heinecke  <aheinecke@intevation.de>
+Forwarded: no
+
+--- a/lib/gcrypt/init.c
++++ b/lib/gcrypt/init.c
+@@ -32,16 +32,9 @@
+ /* Functions that refer to the initialization of the libgcrypt library.
+  */
+ 
+-static struct gcry_thread_cbs gct = {
+-  .option = (GCRY_THREAD_OPTION_PTHREAD | (GCRY_THREAD_OPTION_VERSION << 8)),
+-  .init = NULL,
+-  .select = NULL,
+-  .waitpid = NULL,
+-  .accept = NULL,
+-  .connect = NULL,
+-  .sendmsg = NULL,
+-  .recvmsg = NULL,
+-};
++GCRY_THREAD_OPTION_PTHREAD_IMPL;
++
++static struct gcry_thread_cbs gct;
+ 
+ int
+ gnutls_crypto_init (void)
+@@ -53,11 +46,12 @@ gnutls_crypto_init (void)
+ 
+       if (gnutls_mutex_init != NULL)
+         {
++#if GCRYPT_VERSION_NUMBER < 0x010600
+           gct.mutex_init = gnutls_mutex_init;
+           gct.mutex_destroy = gnutls_mutex_deinit;
+           gct.mutex_lock = gnutls_mutex_lock;
+           gct.mutex_unlock = gnutls_mutex_unlock;
+-
++#endif
+           gcry_control (GCRYCTL_SET_THREAD_CBS, &gct);
+         }
+ 

@@ -1,0 +1,125 @@
+Description: Fix warnings from automake oldies
+ This patch fixes the following automake warnings (treated as errors) in order
+ to run dh_autoreconf successfully with current versions of automake (e.g., 1.14.1):
+ - The 'AM_PROG_MKDIR_P' macro is deprecated, and its use is discouraged.
+   You should use the Autoconf-provided 'AC_PROG_MKDIR_P' macro instead,
+   and use '$(MKDIR_P)' instead of '$(mkdir_p)'in your Makefile.am files.
+ - warning: 'lib*.la': linking libtool libraries using a non-POSIX
+   archiver requires 'AM_PROG_AR' in 'configure.ac'
+   while processing Libtool library 'lib*.la'
+ - warning: source file '*' is in a subdirectory,
+   but option 'subdir-objects' is disabled
+Forwarded: not-needed
+Last-Update: 2014-06-30
+Author: Mauricio Faria de Oliveira <mauricfo@linux.vnet.ibm.com>
+
+Index: gnutls26-2.12.23/aclocal.m4
+===================================================================
+--- gnutls26-2.12.23.orig/aclocal.m4	2013-02-04 06:46:27.000000000 -0200
++++ gnutls26-2.12.23/aclocal.m4	2014-06-30 12:36:03.000000000 -0300
+@@ -495,7 +495,7 @@
+ AM_MISSING_PROG(MAKEINFO, makeinfo)
+ AC_REQUIRE([AM_PROG_INSTALL_SH])dnl
+ AC_REQUIRE([AM_PROG_INSTALL_STRIP])dnl
+-AC_REQUIRE([AM_PROG_MKDIR_P])dnl
++AC_REQUIRE([AC_PROG_MKDIR_P])dnl
+ # We need awk for the "check" target.  The system "awk" is bad on
+ # some platforms.
+ AC_REQUIRE([AC_PROG_AWK])dnl
+Index: gnutls26-2.12.23/lib/aclocal.m4
+===================================================================
+--- gnutls26-2.12.23.orig/lib/aclocal.m4	2013-02-04 06:45:48.000000000 -0200
++++ gnutls26-2.12.23/lib/aclocal.m4	2014-06-30 12:37:09.000000000 -0300
+@@ -655,7 +655,7 @@
+ AM_MISSING_PROG(MAKEINFO, makeinfo)
+ AC_REQUIRE([AM_PROG_INSTALL_SH])dnl
+ AC_REQUIRE([AM_PROG_INSTALL_STRIP])dnl
+-AC_REQUIRE([AM_PROG_MKDIR_P])dnl
++AC_REQUIRE([AC_PROG_MKDIR_P])dnl
+ # We need awk for the "check" target.  The system "awk" is bad on
+ # some platforms.
+ AC_REQUIRE([AC_PROG_AWK])dnl
+Index: gnutls26-2.12.23/lib/gl/m4/po.m4
+===================================================================
+--- gnutls26-2.12.23.orig/lib/gl/m4/po.m4	2012-03-01 12:53:12.000000000 -0300
++++ gnutls26-2.12.23/lib/gl/m4/po.m4	2014-06-30 12:37:22.000000000 -0300
+@@ -24,7 +24,7 @@
+ [
+   AC_REQUIRE([AC_PROG_MAKE_SET])dnl
+   AC_REQUIRE([AC_PROG_INSTALL])dnl
+-  AC_REQUIRE([AM_PROG_MKDIR_P])dnl defined by automake
++  AC_REQUIRE([AC_PROG_MKDIR_P])dnl defined by automake
+   AC_REQUIRE([AM_NLS])dnl
+ 
+   dnl Release version of the gettext macros. This is used to ensure that
+Index: gnutls26-2.12.23/lib/m4/po.m4
+===================================================================
+--- gnutls26-2.12.23.orig/lib/m4/po.m4	2009-11-01 07:42:59.000000000 -0200
++++ gnutls26-2.12.23/lib/m4/po.m4	2014-06-30 12:37:16.000000000 -0300
+@@ -24,7 +24,7 @@
+ [
+   AC_REQUIRE([AC_PROG_MAKE_SET])dnl
+   AC_REQUIRE([AC_PROG_INSTALL])dnl
+-  AC_REQUIRE([AM_PROG_MKDIR_P])dnl defined by automake
++  AC_REQUIRE([AC_PROG_MKDIR_P])dnl defined by automake
+   AC_REQUIRE([AM_NLS])dnl
+ 
+   dnl Release version of the gettext macros. This is used to ensure that
+Index: gnutls26-2.12.23/libextra/aclocal.m4
+===================================================================
+--- gnutls26-2.12.23.orig/libextra/aclocal.m4	2013-02-04 06:46:10.000000000 -0200
++++ gnutls26-2.12.23/libextra/aclocal.m4	2014-06-30 12:37:34.000000000 -0300
+@@ -655,7 +655,7 @@
+ AM_MISSING_PROG(MAKEINFO, makeinfo)
+ AC_REQUIRE([AM_PROG_INSTALL_SH])dnl
+ AC_REQUIRE([AM_PROG_INSTALL_STRIP])dnl
+-AC_REQUIRE([AM_PROG_MKDIR_P])dnl
++AC_REQUIRE([AC_PROG_MKDIR_P])dnl
+ # We need awk for the "check" target.  The system "awk" is bad on
+ # some platforms.
+ AC_REQUIRE([AC_PROG_AWK])dnl
+Index: gnutls26-2.12.23/configure.ac
+===================================================================
+--- gnutls26-2.12.23.orig/configure.ac	2013-02-04 06:33:52.000000000 -0200
++++ gnutls26-2.12.23/configure.ac	2014-06-30 12:24:14.000000000 -0300
+@@ -26,7 +26,7 @@
+ AC_CONFIG_AUX_DIR([build-aux])
+ AC_CONFIG_MACRO_DIR([m4])
+ 
+-AM_INIT_AUTOMAKE([1.10 no-dist-gzip dist-bzip2 -Wall -Werror -Wno-override])
++AM_INIT_AUTOMAKE([1.10 no-dist-gzip dist-bzip2 -Wall -Werror -Wno-override subdir-objects])
+ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+ AC_CONFIG_HEADERS([config.h])
+ 
+@@ -36,6 +36,7 @@
+ 
+ dnl Checks for programs.
+ AC_PROG_CC
++AM_PROG_AR
+ AC_PROG_LN_S
+ GTK_DOC_CHECK(1.1)
+ AC_PATH_PROG([GAA], [gaa])
+Index: gnutls26-2.12.23/lib/configure.ac
+===================================================================
+--- gnutls26-2.12.23.orig/lib/configure.ac	2013-02-04 06:34:03.000000000 -0200
++++ gnutls26-2.12.23/lib/configure.ac	2014-06-30 12:24:22.000000000 -0300
+@@ -31,6 +31,7 @@
+ AC_CONFIG_HEADERS([config.h])
+ 
+ AC_PROG_CC
++AM_PROG_AR
+ lgl_EARLY
+ 
+ AC_LIBTOOL_WIN32_DLL
+Index: gnutls26-2.12.23/libextra/configure.ac
+===================================================================
+--- gnutls26-2.12.23.orig/libextra/configure.ac	2013-02-04 06:34:05.000000000 -0200
++++ gnutls26-2.12.23/libextra/configure.ac	2014-06-30 12:24:18.000000000 -0300
+@@ -31,6 +31,7 @@
+ AC_CONFIG_HEADERS([config.h])
+ 
+ AC_PROG_CC
++AM_PROG_AR
+ xgl_EARLY
+ 
+ AC_LIBTOOL_WIN32_DLL
